@@ -282,7 +282,7 @@ class EntityProcessor extends QueryableProcessor<Entity> {
   }
   
   String getValueMapping(final List<Field> fields, List<String> excludedFields) {
-    return _getValueMapping(fields.where((f) => excludedFields.contains(f.columnName)));
+    return _getValueMapping(fields.where((f) => !excludedFields.contains(f.columnName)));
   }
 
   String _getAttributeValue(final Field field) {
