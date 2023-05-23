@@ -78,7 +78,7 @@ class DaoWriter extends Writer {
         classBuilder.fields.add(field);
 
         final valueMapper =
-            '(${entity.classElement.displayName} item) => ${entity.valueMapping}';
+            '(${entity.classElement.displayName} item) => ${entity.insertValueMapping}';
 
         final requiresChangeListener =
             dbHasViewStreams || streamEntities.contains(entity);

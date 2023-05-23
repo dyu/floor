@@ -15,6 +15,7 @@ class Entity extends Queryable {
   final bool withoutRowid;
   final String valueMapping;
   final Fts? fts;
+  final String insertValueMapping;
 
   Entity(
     ClassElement classElement,
@@ -26,8 +27,10 @@ class Entity extends Queryable {
     this.withoutRowid,
     String constructor,
     this.valueMapping,
-    this.fts,
-  ) : super(classElement, name, fields, constructor);
+    this.fts, {
+    String? insertValueMapping,
+  })  : this.insertValueMapping = insertValueMapping ?? valueMapping,
+        super(classElement, name, fields, constructor);
 
   String getCreateTableStatement() {
     final databaseDefinition = fields.map((field) {

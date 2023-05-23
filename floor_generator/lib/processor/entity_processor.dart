@@ -18,6 +18,8 @@ import 'package:floor_generator/value_object/index.dart';
 import 'package:floor_generator/value_object/primary_key.dart';
 import 'package:floor_generator/value_object/type_converter.dart';
 
+String _columnNameOf(Field f) => f.columnName;
+
 class EntityProcessor extends QueryableProcessor<Entity> {
   final EntityProcessorError _processorError;
 
@@ -37,18 +39,25 @@ class EntityProcessor extends QueryableProcessor<Entity> {
     if (primaryKey.autoGenerateId && withoutRowid) {
       throw _processorError.autoIncrementInWithoutRowid;
     }
+    
+    final valueMapping = _getValueMapping(fields);
+    final insertValueMapping = !primaryKey.autoGenerateId
+        ? valueMapping
+        : getValueMapping(fields,
+            primaryKey.fields.map(_columnNameOf).toList(growable: false));
 
     return Entity(
       classElement,
       name,
       fields,
-      _getPrimaryKey(fields),
+      primaryKey,
       _getForeignKeys(),
       _getIndices(fields, name),
-      _getWithoutRowid(),
+      withoutRowid,
       getConstructor(fields),
-      _getValueMapping(fields),
+      valueMapping,
       _getFts(),
+      insertValueMapping: insertValueMapping,
     );
   }
 
@@ -262,7 +271,7 @@ class EntityProcessor extends QueryableProcessor<Entity> {
         false;
   }
 
-  String _getValueMapping(final List<Field> fields) {
+  String _getValueMapping(final Iterable<Field> fields) {
     final keyValueList = fields.map((field) {
       final columnName = field.columnName;
       final attributeValue = _getAttributeValue(field);
@@ -270,6 +279,10 @@ class EntityProcessor extends QueryableProcessor<Entity> {
     }).toList();
 
     return '<String, Object?>{${keyValueList.join(', ')}}';
+  }
+  
+  String getValueMapping(final List<Field> fields, List<String> excludedFields) {
+    return _getValueMapping(fields.where((f) => excludedFields.contains(f.columnName)));
   }
 
   String _getAttributeValue(final Field field) {
