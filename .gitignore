@@ -28,6 +28,7 @@ floor/**/*.g.dart
 .pub-cache/
 .pub/
 build/
+target
 .flutter-plugins-dependencies
 
 # Android related
