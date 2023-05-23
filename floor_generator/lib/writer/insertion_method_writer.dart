@@ -5,6 +5,13 @@ import 'package:floor_generator/misc/extension/string_extension.dart';
 import 'package:floor_generator/value_object/insertion_method.dart';
 import 'package:floor_generator/writer/writer.dart';
 
+String _resolvePrefix(InsertionMethod method) {
+  return method.entity.insertValueMapping == method.entity.valueMapping ||
+          !method.onConflict.endsWith('.replace')
+      ? 'In'
+      : 'Up';
+}
+
 class InsertionMethodWriter implements Writer {
   final InsertionMethod _method;
   final ChangeMethodWriterHelper _helper;
@@ -45,10 +52,11 @@ class InsertionMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final fieldName = '_$entityClassName${_resolvePrefix(_method)}sertionAdapter';
     if (_method.changesMultipleItems) {
-      return 'await _${entityClassName}InsertionAdapter.insertList($methodSignatureParameterName, ${_method.onConflict});';
+      return 'await $fieldName.insertList($methodSignatureParameterName, ${_method.onConflict});';
     } else {
-      return 'await _${entityClassName}InsertionAdapter.insert($methodSignatureParameterName, ${_method.onConflict});';
+      return 'await $fieldName.insert($methodSignatureParameterName, ${_method.onConflict});';
     }
   }
 
@@ -56,10 +64,11 @@ class InsertionMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final fieldName = '_$entityClassName${_resolvePrefix(_method)}sertionAdapter';
     if (_method.changesMultipleItems) {
-      return 'return _${entityClassName}InsertionAdapter.insertListAndReturnIds($methodSignatureParameterName, ${_method.onConflict});';
+      return 'return $fieldName.insertListAndReturnIds($methodSignatureParameterName, ${_method.onConflict});';
     } else {
-      return 'return _${entityClassName}InsertionAdapter.insertAndReturnId($methodSignatureParameterName, ${_method.onConflict});';
+      return 'return $fieldName.insertAndReturnId($methodSignatureParameterName, ${_method.onConflict});';
     }
   }
 }

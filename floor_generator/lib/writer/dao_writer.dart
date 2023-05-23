@@ -67,25 +67,26 @@ class DaoWriter extends Writer {
 
       for (final entity in entities) {
         final entityClassName = entity.classElement.displayName;
-        final fieldName = '_${entityClassName.decapitalize()}InsertionAdapter';
+        final entityCamelCase = entityClassName.decapitalize();
         final type = refer('InsertionAdapter<$entityClassName>');
-
-        final field = Field((builder) => builder
-          ..name = fieldName
-          ..type = type
-          ..modifier = FieldModifier.final$);
-
-        classBuilder.fields.add(field);
-
-        final valueMapper =
-            '(${entity.classElement.displayName} item) => ${entity.insertValueMapping}';
-
-        final requiresChangeListener =
-            dbHasViewStreams || streamEntities.contains(entity);
-
-        constructorBuilder
-          ..initializers.add(Code(
-              "$fieldName = InsertionAdapter(database, '${entity.name}', $valueMapper${requiresChangeListener ? ', changeListener' : ''})"));
+        _makeInsertionAdapter(
+          type,
+          '_${entityCamelCase}InsertionAdapter',
+          entity.insertValueMapping,
+          classBuilder,
+          entity,
+          constructorBuilder,
+        );
+        if (entity.valueMapping != entity.insertValueMapping) {
+          _makeInsertionAdapter(
+            type,
+            '_${entityCamelCase}UpsertionAdapter',
+            entity.valueMapping,
+            classBuilder,
+            entity,
+            constructorBuilder,
+          );
+        }
       }
     }
 
@@ -154,6 +155,31 @@ class DaoWriter extends Writer {
       ..methods.addAll(_generateTransactionMethods(dao.transactionMethods));
 
     return classBuilder.build();
+  }
+
+  void _makeInsertionAdapter(
+      Reference type,
+      String fieldName,
+      String valueMapping,
+      ClassBuilder classBuilder,
+      Entity entity,
+      ConstructorBuilder constructorBuilder) {
+    final field = Field((builder) => builder
+      ..name = fieldName
+      ..type = type
+      ..modifier = FieldModifier.final$);
+
+    classBuilder.fields.add(field);
+
+    final valueMapper =
+        '(${entity.classElement.displayName} item) => $valueMapping';
+
+    final requiresChangeListener =
+        dbHasViewStreams || streamEntities.contains(entity);
+
+    constructorBuilder
+      ..initializers.add(Code(
+          "$fieldName = InsertionAdapter(database, '${entity.name}', $valueMapper${requiresChangeListener ? ', changeListener' : ''})"));
   }
 
   List<Field> _createFields(
