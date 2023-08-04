@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:floor/src/util/primary_key_helper.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common/sqlite_api.dart' show DatabaseExecutor;
 
 class DeletionAdapter<T> {
   final DatabaseExecutor _database;

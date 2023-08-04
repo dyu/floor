@@ -1,5 +1,5 @@
 import 'package:floor/src/migration.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common/sqlite_api.dart' show Database;
 
 // ignore: avoid_classes_with_only_static_members
 abstract class MigrationAdapter {

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:floor/src/util/string_utils.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common/sqlite_api.dart' show DatabaseExecutor;
 import 'package:sqlparser/sqlparser.dart';
 
 import '../util/constants.dart';
