@@ -1,5 +1,6 @@
 import 'package:build_test/build_test.dart';
 import 'package:code_builder/code_builder.dart';
+import 'package:dart_style/dart_style.dart';
 import 'package:floor_generator/processor/database_processor.dart';
 import 'package:floor_generator/value_object/database.dart';
 import 'package:floor_generator/writer/database_writer.dart';
@@ -7,6 +8,12 @@ import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
 import '../test_utils.dart';
+
+final _dartfmt = DartFormatter();
+
+String toLiteral(Class actual) {
+  return _dartfmt.format(actual.accept(DartEmitter()).toString());
+}
 
 void main() {
   useDartfmt();
@@ -28,13 +35,19 @@ void main() {
     ''');
 
     final actual = DatabaseWriter(database).write();
-
+    //print(toLiteral(actual));
     expect(actual, equalsDart(r'''
     class _$TestDatabase extends TestDatabase {
         _$TestDatabase([StreamController<String>? listener]) {
           changeListener = listener ?? StreamController<String>.broadcast();
         }
-      
+        
+        static const Map<String, List<String>> _tableStatements = {
+          "Person": [
+            "CREATE TABLE IF NOT EXISTS `Person` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`));"
+          ]
+        };
+        
         Future<sqflite.Database> open(
           String path,
           List<Migration> migrations, [
@@ -56,8 +69,7 @@ void main() {
               await callback?.onUpgrade?.call(database, startVersion, endVersion);
             },
             onCreate: (database, version) async {
-              await database.execute(
-                  'CREATE TABLE IF NOT EXISTS `Person` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`))');
+              await database.execute(_tableStatements.values.expand((e) => e).join('\n'));
       
               await callback?.onCreate?.call(database, version);
             },
@@ -93,12 +105,18 @@ void main() {
     ''');
 
     final actual = DatabaseWriter(database).write();
-
+    //print(toLiteral(actual));
     expect(actual, equalsDart(r'''
       class _$TestDatabase extends TestDatabase {
         _$TestDatabase([StreamController<String>? listener]) {
           changeListener = listener ?? StreamController<String>.broadcast();
         }
+        
+        static const Map<String, List<String>> _tableStatements = {
+          "Person": [
+            "CREATE TABLE IF NOT EXISTS `Person` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`));"
+          ]
+        };
         
         TestDao? _testDaoInstance;
         
@@ -123,8 +141,7 @@ void main() {
               await callback?.onUpgrade?.call(database, startVersion, endVersion);
             },
             onCreate: (database, version) async {
-              await database.execute(
-                  'CREATE TABLE IF NOT EXISTS `Person` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`))');
+              await database.execute(_tableStatements.values.expand((e) => e).join('\n'));
       
               await callback?.onCreate?.call(database, version);
             },
@@ -158,12 +175,18 @@ void main() {
     ''');
 
     final actual = DatabaseWriter(database).write();
-
+    //print(toLiteral(actual));
     expect(actual, equalsDart(r'''
       class _$TestDatabase extends TestDatabase {
         _$TestDatabase([StreamController<String>? listener]) {
           changeListener = listener ?? StreamController<String>.broadcast();
         }
+        
+        static const Map<String, List<String>> _tableStatements = {
+          "custom_table_name": [
+            "CREATE TABLE IF NOT EXISTS `custom_table_name` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL);"
+          ]
+        };
         
         Future<sqflite.Database> open(
           String path,
@@ -186,8 +209,7 @@ void main() {
               await callback?.onUpgrade?.call(database, startVersion, endVersion);
             },
             onCreate: (database, version) async {
-              await database.execute(
-                  'CREATE TABLE IF NOT EXISTS `custom_table_name` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL)');
+              await database.execute(_tableStatements.values.expand((e) => e).join('\n'));
 
               await callback?.onCreate?.call(database, version);
             },
@@ -224,13 +246,19 @@ void main() {
     ''');
 
     final actual = DatabaseWriter(database).write();
-
+    //print(toLiteral(actual));
     expect(actual, equalsDart(r"""
       class _$TestDatabase extends TestDatabase {
         _$TestDatabase([StreamController<String>? listener]) {
          changeListener = listener ?? StreamController<String>.broadcast();
         }
-      
+        
+        static const Map<String, List<String>> _tableStatements = {
+          "Person": [
+            "CREATE TABLE IF NOT EXISTS `Person` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`));"
+          ]
+        };
+        
         Future<sqflite.Database> open(
           String path,
           List<Migration> migrations, [
@@ -252,9 +280,7 @@ void main() {
               await callback?.onUpgrade?.call(database, startVersion, endVersion);
             },
             onCreate: (database, version) async {
-              await database.execute(
-                  'CREATE TABLE IF NOT EXISTS `Person` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`))');
-                  
+              await database.execute(_tableStatements.values.expand((e) => e).join('\n'));
               await database.execute(
                   'CREATE VIEW IF NOT EXISTS `names` AS SELECT custom_name as name FROM person');
 

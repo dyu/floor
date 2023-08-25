@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:code_builder/code_builder.dart';
 import 'package:floor_generator/misc/annotation_expression.dart';
 import 'package:floor_generator/misc/extension/string_extension.dart';
@@ -5,9 +7,14 @@ import 'package:floor_generator/value_object/database.dart';
 import 'package:floor_generator/value_object/entity.dart';
 import 'package:floor_generator/writer/writer.dart';
 
+const _encoder = JsonEncoder.withIndent('  ');
+
+String _trimQuotes(String text) => text.substring(1, text.length - 1);
+
 /// Takes care of generating the database implementation.
 class DatabaseWriter implements Writer {
   final Database database;
+  final Map<String, List<String>> tableStatements = {};
 
   DatabaseWriter(this.database);
 
@@ -24,6 +31,11 @@ class DatabaseWriter implements Writer {
       ..extend = refer(databaseName)
       ..methods.add(_generateOpenMethod(database))
       ..methods.addAll(_generateDaoGetters(database))
+      ..fields.add(Field((builder) => builder
+        ..static = true
+        ..name = '_tableStatements'
+        ..type = refer('const Map<String, List<String>>')
+        ..assignment = Code(_encoder.convert(tableStatements))))
       ..fields.addAll(_generateDaoInstances(database))
       ..constructors.add(_generateConstructor()));
   }
@@ -69,6 +81,17 @@ class DatabaseWriter implements Writer {
   }
 
   Method _generateOpenMethod(final Database database) {
+    
+    for (final entity in database.entities) {
+      final list = <String>[];
+      tableStatements[entity.name] = list;
+      list.add('${_trimQuotes(entity.getCreateTableStatement().toLiteral())};');
+      for (final index in entity.indices) {
+        list.add('${_trimQuotes(index.createQuery().toLiteral())};');
+      }
+    }
+    
+    /*
     final createTableStatements = _generateCreateTableSqlStatements(
             database.entities)
         .map((statement) => 'await database.execute(${statement.toLiteral()});')
@@ -78,6 +101,7 @@ class DatabaseWriter implements Writer {
         .expand((statements) => statements)
         .map((statement) => 'await database.execute(${statement.toLiteral()});')
         .join('\n');
+    */
     final createViewStatements = database.views
         .map((view) => view.getCreateViewStatement().toLiteral())
         .map((statement) => 'await database.execute($statement);')
@@ -115,8 +139,7 @@ class DatabaseWriter implements Writer {
               await callback?.onUpgrade?.call(database, startVersion, endVersion);
             },
             onCreate: (database, version) async {
-              $createTableStatements
-              $createIndexStatements
+              await database.execute(_tableStatements.values.expand((e) => e).join('\\n'));
               $createViewStatements
 
               await callback?.onCreate?.call(database, version);
