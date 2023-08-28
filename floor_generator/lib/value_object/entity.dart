@@ -33,19 +33,32 @@ class Entity extends Queryable {
         super(classElement, name, fields, constructor);
 
   String getCreateTableStatement() {
-    final databaseDefinition = fields.map((field) {
-      final autoIncrement =
-          primaryKey.fields.contains(field) && primaryKey.autoGenerateId;
-      return field.getDatabaseDefinition(autoIncrement);
-    }).toList();
+    final databaseDefinition = <String>[];
+    var hasFtsRowid = false;
+    for (final field in fields) {
+      if (fts != null && !hasFtsRowid && field.columnName == 'rowid') {
+        if (field.sqlType != 'INTEGER') {
+          throw 'A `rowid` field must be of type: INTEGER';
+        }
+        hasFtsRowid = true;
+        continue;
+      }
+      databaseDefinition.add(
+        field.getDatabaseDefinition(
+          primaryKey.autoGenerateId && primaryKey.fields.contains(field),
+        ),
+      );
+    }
 
-    final foreignKeyDefinitions =
-        foreignKeys.map((foreignKey) => foreignKey.getDefinition()).toList();
-    databaseDefinition.addAll(foreignKeyDefinitions);
+    if (foreignKeys.isNotEmpty) {
+      databaseDefinition.addAll(
+        foreignKeys.map((foreignKey) => foreignKey.getDefinition()),
+      );
+    }
 
-    final primaryKeyDefinition = _createPrimaryKeyDefinition();
-    if (primaryKeyDefinition != null) {
-      databaseDefinition.add(primaryKeyDefinition);
+    final pkDefinition = hasFtsRowid ? null : _createPrimaryKeyDefinition();
+    if (pkDefinition != null) {
+      databaseDefinition.add(pkDefinition);
     }
 
     if (fts == null) {
@@ -53,7 +66,7 @@ class Entity extends Queryable {
     } else {
       final tco = fts!.tableCreateOption();
       if (tco.isNotEmpty) {
-        databaseDefinition.add('$tco');
+        databaseDefinition.add(tco);
       }
       return 'CREATE VIRTUAL TABLE IF NOT EXISTS `$name` ${fts!.usingOption}(${databaseDefinition.join(', ')})';
     }
