@@ -48,13 +48,12 @@ class Entity extends Queryable {
       databaseDefinition.add(primaryKeyDefinition);
     }
 
-    final withoutRowidClause = withoutRowid ? ' WITHOUT ROWID' : '';
-
     if (fts == null) {
-      return 'CREATE TABLE IF NOT EXISTS `$name` (${databaseDefinition.join(', ')})$withoutRowidClause';
+      return 'CREATE TABLE IF NOT EXISTS `$name` (${databaseDefinition.join(', ')})${withoutRowid ? ' WITHOUT ROWID' : ''}';
     } else {
-      if (fts!.tableCreateOption().isNotEmpty) {
-        databaseDefinition.add('${fts!.tableCreateOption()}');
+      final tco = fts!.tableCreateOption();
+      if (tco.isNotEmpty) {
+        databaseDefinition.add('$tco');
       }
       return 'CREATE VIRTUAL TABLE IF NOT EXISTS `$name` ${fts!.usingOption}(${databaseDefinition.join(', ')})';
     }
