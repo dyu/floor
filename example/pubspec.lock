@@ -219,9 +219,10 @@ packages:
   floor_annotation:
     dependency: transitive
     description:
-      path: "../floor_annotation"
-      relative: true
-    source: path
+      name: floor_annotation
+      sha256: fa3fa4f198cdd1d922a69ceb06e54663fe59256bf1cb3c036eff206b445a6960
+      url: "https://pub.dev"
+    source: hosted
     version: "1.4.2"
   floor_generator:
     dependency: "direct dev"
@@ -231,7 +232,7 @@ packages:
     source: path
     version: "1.4.2"
   flutter:
-    dependency: "direct main"
+    dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -292,10 +293,10 @@ packages:
     dependency: transitive
     description:
       name: js
-      sha256: "323b7c70073cccf6b9b8d8b334be418a3293cfb612a560dc2737160a37bf61bd"
+      sha256: "5528c2f391ededb7775ec1daa69e65a2d61276f7552de2b5f7b8d34ee9fd4ab7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.6"
+    version: "0.6.5"
   json_annotation:
     dependency: transitive
     description:
@@ -324,10 +325,10 @@ packages:
     dependency: transitive
     description:
       name: matcher
-      sha256: c94db23593b89766cda57aab9ac311e3616cf87c6fa4e9749df032f66f30dcb8
+      sha256: "16db949ceee371e9b99d22f88fa3a73c4e59fd0afed0bd25fc336eb76c198b72"
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.14"
+    version: "0.12.13"
   material_color_utilities:
     dependency: transitive
     description:
@@ -364,10 +365,10 @@ packages:
     dependency: transitive
     description:
       name: path
-      sha256: "8829d8a55c13fc0e37127c29fedf290c102f4e40ae94ada574091fe0ff96c917"
+      sha256: db9d4f58c908a4ba5953fcee2ae317c94889433e5024c27ce74a37f94267945b
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.3"
+    version: "1.8.2"
   pool:
     dependency: transitive
     description:
@@ -429,37 +430,40 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
-  sqflite:
-    dependency: transitive
-    description:
-      name: sqflite
-      sha256: "500d6fec583d2c021f2d25a056d96654f910662c64f836cd2063167b8f1fa758"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.6"
   sqflite_common:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sqflite_common
-      sha256: "963dad8c4aa2f814ce7d2d5b1da2f36f31bd1a439d8f27e3dc189bb9d26bc684"
+      sha256: e77abf6ff961d69dfef41daccbb66b51e9983cdd5cb35bf30733598057401555
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.3"
+    version: "2.4.5"
   sqflite_common_ffi:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: sqflite_common_ffi
-      sha256: "0595da0b418deff5a93a20e15811e73ea1bbce89745eeebed87c37f8027b7a5d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.3"
+      path: sqflite_common_ffi
+      ref: sqlcipher
+      resolved-ref: b928aba60d8c0334544d6027487b8f4e321a116d
+      url: "https://github.com/dyu/sqflite"
+    source: git
+    version: "2.2.5"
+  sqlcipher_flutter_libs:
+    dependency: "direct main"
+    description:
+      path: sqlcipher_flutter_libs
+      ref: sqlcipher
+      resolved-ref: "48b5534588429822b78ce325ea13d09ee605fc97"
+      url: "https://github.com/dyu/sqlite3.dart"
+    source: git
+    version: "0.5.7"
   sqlite3:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: sqlite3
-      sha256: a3ba4b66a7ab170ce7aa3f5ac43c19ee8d6637afbe7b7c95c94112b4f4d91566
-      url: "https://pub.dev"
-    source: hosted
+      path: sqlite3
+      ref: sqlcipher
+      resolved-ref: "48b5534588429822b78ce325ea13d09ee605fc97"
+      url: "https://github.com/dyu/sqlite3.dart"
+    source: git
     version: "1.11.0"
   sqlparser:
     dependency: transitive
@@ -529,10 +533,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "6182294da5abf431177fccc1ee02401f6df30f766bc6130a0852c6b6d7ee6b2d"
+      sha256: ad540f65f92caa91bf21dfc8ffb8c589d6e4dc0c2267818b4cc2792857706206
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.18"
+    version: "0.4.16"
   timing:
     dependency: transitive
     description:
@@ -590,5 +594,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.0 <4.0.0"
-  flutter: ">=3.3.0"
+  dart: ">=2.19.0 <3.0.0"
+  flutter: ">=1.10.1"

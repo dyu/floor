@@ -25,6 +25,8 @@ void main() {
 
       await tester.enterText(textFieldFinder, 'Hello world!');
       await tester.tap(raisedButtonFinder);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await tester.pump();
 
       final tasks = await taskDao.findAllTasks();
       expect(tasks, isNotEmpty);

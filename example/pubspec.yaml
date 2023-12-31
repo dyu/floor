@@ -12,8 +12,22 @@ environment:
 dependencies:
   floor:
     path: ../floor/
-  flutter:
-    sdk: flutter
+  sqflite_common: 2.4.5
+  sqflite_common_ffi:
+    git:
+      url: https://github.com/dyu/sqflite
+      path: sqflite_common_ffi
+      ref: sqlcipher
+  sqlcipher_flutter_libs:
+    git:
+      url: https://github.com/dyu/sqlite3.dart
+      path: sqlcipher_flutter_libs
+      ref: sqlcipher
+  sqlite3:
+    git:
+      url: https://github.com/dyu/sqlite3.dart
+      path: sqlite3
+      ref: sqlcipher
 
 dev_dependencies:
   analyzer: ^5.0.0

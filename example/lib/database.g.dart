@@ -61,6 +61,12 @@ class _$FlutterDatabase extends FlutterDatabase {
     changeListener = listener ?? StreamController<String>.broadcast();
   }
 
+  static const Map<String, List<String>> _tableStatements = {
+    "Task": [
+      "CREATE TABLE IF NOT EXISTS `Task` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `message` TEXT NOT NULL, `isRead` INTEGER, `timestamp` INTEGER NOT NULL, `status` INTEGER, `type` TEXT);"
+    ]
+  };
+
   TaskDao? _taskDaoInstance;
 
   Future<sqflite.Database> open(
@@ -84,8 +90,8 @@ class _$FlutterDatabase extends FlutterDatabase {
         await callback?.onUpgrade?.call(database, startVersion, endVersion);
       },
       onCreate: (database, version) async {
-        await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Task` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `message` TEXT NOT NULL, `isRead` INTEGER, `timestamp` INTEGER NOT NULL, `status` INTEGER, `type` TEXT)');
+        await database
+            .execute(_tableStatements.values.expand((e) => e).join('\n'));
 
         await callback?.onCreate?.call(database, version);
       },
@@ -105,6 +111,17 @@ class _$TaskDao extends TaskDao {
     this.changeListener,
   )   : _queryAdapter = QueryAdapter(database, changeListener),
         _taskInsertionAdapter = InsertionAdapter(
+            database,
+            'Task',
+            (Task item) => <String, Object?>{
+                  'message': item.message,
+                  'isRead': item.isRead == null ? null : (item.isRead! ? 1 : 0),
+                  'timestamp': _dateTimeConverter.encode(item.timestamp),
+                  'status': item.status?.index,
+                  'type': _taskTypeConverter.encode(item.type)
+                },
+            changeListener),
+        _taskUpsertionAdapter = InsertionAdapter(
             database,
             'Task',
             (Task item) => <String, Object?>{
@@ -150,6 +167,8 @@ class _$TaskDao extends TaskDao {
   final QueryAdapter _queryAdapter;
 
   final InsertionAdapter<Task> _taskInsertionAdapter;
+
+  final InsertionAdapter<Task> _taskUpsertionAdapter;
 
   final UpdateAdapter<Task> _taskUpdateAdapter;
 
