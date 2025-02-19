@@ -237,6 +237,7 @@ class EntityProcessor extends QueryableProcessor<Entity> {
       return null;
     }
 
+    /*
     final compoundPrimaryKeyFields = fields.where((field) {
       return compoundPrimaryKeyColumnNames.any(
           (primaryKeyColumnName) => field.columnName == primaryKeyColumnName);
@@ -244,6 +245,18 @@ class EntityProcessor extends QueryableProcessor<Entity> {
 
     if (compoundPrimaryKeyFields.isEmpty) {
       throw _processorError.missingPrimaryKey;
+    }
+    */
+    final compoundPrimaryKeyFields = <Field>[];
+    var idx = 0;
+    for (final fieldName in compoundPrimaryKeyColumnNames) {
+      if (fieldName != null &&
+          -1 != (idx = fields.indexWhere((f) => f.columnName == fieldName))) {
+        compoundPrimaryKeyFields.add(fields[idx]);
+      }
+    }
+    if (compoundPrimaryKeyFields.length != compoundPrimaryKeyColumnNames.length) {
+      throw _processorError.mismatchPrimaryKey;
     }
 
     return PrimaryKey(compoundPrimaryKeyFields, false);

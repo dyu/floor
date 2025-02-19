@@ -546,7 +546,7 @@ void main() {
       expect(
           processor.process,
           throwsInvalidGenerationSourceError(
-              EntityProcessorError(classElements).missingPrimaryKey));
+              EntityProcessorError(classElements).mismatchPrimaryKey));
     });
     test('missing parent columns', () async {
       final classElements = await _createClassElements('''

@@ -17,6 +17,14 @@ class EntityProcessorError {
       element: _classElement,
     );
   }
+  
+  InvalidGenerationSourceError get mismatchPrimaryKey {
+    return InvalidGenerationSourceError(
+      'Unknown column/field name on the composite primary keys defined on the entity ${_classElement.displayName} contain.',
+      todo: 'Make sure all the column/field names are correctly defined in the the primaryKeys field of @Entity()',
+      element: _classElement,
+    );
+  }
 
   InvalidGenerationSourceError get missingParentColumns {
     return InvalidGenerationSourceError(
