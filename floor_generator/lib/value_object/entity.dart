@@ -34,7 +34,9 @@ class Entity extends Queryable {
   })  : this.insertValueMapping = insertValueMapping ?? valueMapping,
         super(classElement, name, fields, constructor);
 
-  String getCreateTableStatement() {
+  String getCreateTableStatement({
+    Map<String, String> prefixes = const {},
+  }) {
     final databaseDefinition = <String>[];
     var hasFtsRowid = false;
     for (final field in fields) {
@@ -62,16 +64,23 @@ class Entity extends Queryable {
     if (pkDefinition != null) {
       databaseDefinition.add(pkDefinition);
     }
-
+    
+    final String prefix, suffix;
     if (fts == null) {
-      return 'CREATE TABLE IF NOT EXISTS `$name` (${databaseDefinition.join(', ')})${withoutRowid ? ' WITHOUT ROWID' : ''}';
+      prefix = 'CREATE TABLE IF NOT EXISTS ';
+      suffix = ' (${databaseDefinition.join(', ')})${withoutRowid ? ' WITHOUT ROWID' : ''}';
     } else {
       final tco = fts!.tableCreateOption();
       if (tco.isNotEmpty) {
         databaseDefinition.add(tco);
       }
-      return 'CREATE VIRTUAL TABLE IF NOT EXISTS `$name` ${fts!.usingOption}(${databaseDefinition.join(', ')})';
+      prefix = 'CREATE VIRTUAL TABLE IF NOT EXISTS ';
+      suffix = ' ${fts!.usingOption}(${databaseDefinition.join(', ')})';
     }
+    for (final k in prefixes.keys) {
+      prefixes[k] = '$prefix`$k$name`$suffix';
+    }
+    return '$prefix`$name`$suffix';
   }
 
   String? _createPrimaryKeyDefinition() {

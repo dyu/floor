@@ -219,6 +219,82 @@ void main() {
       }      
     '''));
   });
+  
+  test('open database for prefixed entity', () async {
+    final database = await _createDatabase('''
+      @Database(version: 1, entities: [Person])
+      abstract class TestDatabase extends FloorDatabase {}
+      
+      @Entity(
+        tableName: 'person',
+        indices: [
+          Index(value: ['custom_name']),
+        ],
+        prefixes: {
+          'foo_': null,
+        }
+      )
+      class Person {
+        @PrimaryKey(autoGenerate: true)
+        final int? id;
+      
+        @ColumnInfo(name: 'custom_name')
+        final String custom_name;
+      
+        Person(this.id, this.custom_name);
+      }
+    ''');
+
+    final actual = DatabaseWriter(database).write();
+    // print(toLiteral(actual));
+    expect(actual, equalsDart(r'''
+      class _$TestDatabase extends TestDatabase {
+        _$TestDatabase([StreamController<String>? listener]) {
+          changeListener = listener ?? StreamController<String>.broadcast();
+        }
+        
+        static const Map<String, List<String>> _tableStatements = {
+          "person": [
+            "CREATE TABLE IF NOT EXISTS `person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL);",
+            "CREATE INDEX `index_person_custom_name` ON `person` (`custom_name`);"
+          ],
+          "foo_person": [
+            "CREATE TABLE IF NOT EXISTS `foo_person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL);",
+            "CREATE INDEX `index_foo_person_custom_name` ON `foo_person` (`custom_name`);"
+          ]
+        };
+        
+        Future<sqflite.Database> open(
+          String path,
+          List<Migration> migrations, [
+          Callback? callback,
+        ]) async {
+          final databaseOptions = sqflite.OpenDatabaseOptions(
+            version: 1,
+            onConfigure: (database) async {
+              await database.execute('PRAGMA foreign_keys = ON');
+              await callback?.onConfigure?.call(database);
+            },
+            onOpen: (database) async {
+              await callback?.onOpen?.call(database);
+            },
+            onUpgrade: (database, startVersion, endVersion) async {
+              await MigrationAdapter.runMigrations(
+                  database, startVersion, endVersion, migrations);
+
+              await callback?.onUpgrade?.call(database, startVersion, endVersion);
+            },
+            onCreate: (database, version) async {
+              await database.execute(_tableStatements.values.expand((e) => e).join('\n'));
+
+              await callback?.onCreate?.call(database, version);
+            },
+          );
+          return sqfliteDatabaseFactory.openDatabase(path, options: databaseOptions);
+        }
+      }      
+    '''));
+  });
 
   test('open database with view', () async {
     final database = await _createDatabase('''

@@ -51,7 +51,7 @@ class EntityProcessor extends QueryableProcessor<Entity> {
     final indices = _getIndices(fields, name);
     final constructor = getConstructor(fields);
     final fts = _getFts();
-    _resolvePrefixes(fields, name);
+    _resolvePrefixes(fields, name, indices);
     return Entity(
       classElement,
       name,
@@ -215,7 +215,11 @@ class EntityProcessor extends QueryableProcessor<Entity> {
         [];
   }
   
-  void _resolvePrefixes(final List<Field> fields, final String tableName) {
+  void _resolvePrefixes(
+    final List<Field> fields,
+    final String tableName,
+    final List<Index> indices,
+  ) {
     final map = classElement
         .getAnnotation(annotations.Entity)
         ?.getField(AnnotationField.entityPrefixes)
@@ -227,16 +231,34 @@ class EntityProcessor extends QueryableProcessor<Entity> {
       if (k == null || k.isEmpty) {
         throw _processorError.missingPrefixName;
       }
-      final list = entry.value?.getField(IndexField.value)?.toListValue();
+      final fullName = '$k$tableName';
+      final v = entry.value;
+      if (v == null || v.isNull) {
+        // same index structure/decls as main table
+        _prefixes[k] = indices
+            .map(
+              (e) => Index(
+                _generateIndexName(fullName, e.columnNames),
+                fullName,
+                e.unique,
+                e.columnNames,
+              ),
+            )
+            .toList();
+        continue;
+      }
+      final list = v.getField(IndexField.value)?.toListValue();
       if (list == null || list.isEmpty) {
+        // empty indices
         _prefixes[k] = const <Index>[];
         continue;
       }
+      // custom indices
       _prefixes[k] = list
           .map(
             (indexObject) => _resolveIndex(
                 fields,
-                tableName,
+                fullName,
                 indexObject,
                 indexObject
                     .getField(IndexField.value)

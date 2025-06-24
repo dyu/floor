@@ -83,11 +83,23 @@ class DatabaseWriter implements Writer {
   Method _generateOpenMethod(final Database database) {
     
     for (final entity in database.entities) {
+      final map = {
+        for (final k in entity.prefixes.keys) k: k,
+      };
       final list = <String>[];
       tableStatements[entity.name] = list;
-      list.add('${_trimQuotes(entity.getCreateTableStatement().toLiteral())};');
+      list.add('${_trimQuotes(entity.getCreateTableStatement(prefixes: map).toLiteral())};');
       for (final index in entity.indices) {
         list.add('${_trimQuotes(index.createQuery().toLiteral())};');
+      }
+      for (final entry in entity.prefixes.entries) {
+        final stmts = <String>[];
+        final name = '${entry.key}${entity.name}';
+        tableStatements[name] = stmts;
+        stmts.add('${_trimQuotes(map[entry.key].toLiteral())};');
+        for (final index in entry.value) {
+          stmts.add('${_trimQuotes(index.createQuery().toLiteral())};');
+        }
       }
     }
     
