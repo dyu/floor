@@ -12,6 +12,7 @@ abstract class AnnotationField {
   static const entityTableName = 'tableName';
   static const entityForeignKeys = 'foreignKeys';
   static const entityIndices = 'indices';
+  static const entityPrefixes = 'prefixes';
   static const entityPrimaryKeys = 'primaryKeys';
   static const entityWithoutRowid = 'withoutRowid';
 

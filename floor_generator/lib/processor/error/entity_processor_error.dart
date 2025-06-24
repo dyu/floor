@@ -57,6 +57,15 @@ class EntityProcessorError {
       element: _classElement,
     );
   }
+  
+  InvalidGenerationSourceError get missingPrefixName {
+    return InvalidGenerationSourceError(
+      'First prefix name not defined.',
+      todo:
+          "Make sure to add a prefix name like: prefixes: {'pfx_name_': []}.",
+      element: _classElement,
+    );
+  }
 
   InvalidGenerationSourceError get missingIndexColumnName {
     return InvalidGenerationSourceError(

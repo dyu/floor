@@ -22,6 +22,7 @@ String _columnNameOf(Field f) => f.columnName;
 
 class EntityProcessor extends QueryableProcessor<Entity> {
   final EntityProcessorError _processorError;
+  final _prefixes = <String, List<Index>>{};
 
   EntityProcessor(
     final ClassElement classElement,
@@ -46,17 +47,23 @@ class EntityProcessor extends QueryableProcessor<Entity> {
         : getValueMapping(fields,
             primaryKey.fields.map(_columnNameOf).toList(growable: false));
 
+    final foreignKeys = _getForeignKeys();
+    final indices = _getIndices(fields, name);
+    final constructor = getConstructor(fields);
+    final fts = _getFts();
+    _resolvePrefixes(fields, name);
     return Entity(
       classElement,
       name,
       fields,
       primaryKey,
-      _getForeignKeys(),
-      _getIndices(fields, name),
+      foreignKeys,
+      indices,
       withoutRowid,
-      getConstructor(fields),
+      constructor,
       valueMapping,
-      _getFts(),
+      fts,
+      prefixes: _prefixes,
       insertValueMapping: insertValueMapping,
     );
   }
@@ -161,39 +168,84 @@ class EntityProcessor extends QueryableProcessor<Entity> {
 
     return Fts4(tokenizer, tokenizerArgs);
   }
+  
+  Index _resolveIndex(
+    final List<Field> fields,
+    final String tableName,
+    final DartObject indexObject,
+    final List<String>? indexColumnNames,
+  ) {
+    final unique = indexObject.getField(IndexField.unique)?.toBoolValue();
+    // can't happen as Index.unique is non-nullable
+    if (unique == null) throw ArgumentError.notNull();
+    
+    if (indexColumnNames == null || indexColumnNames.isEmpty) {
+      throw _processorError.missingIndexColumnName;
+    }
+
+    for (final indexColumnName in indexColumnNames) {
+      if (!fields.any((field) => field.columnName == indexColumnName)) {
+        throw _processorError.noMatchingColumn(indexColumnName);
+      }
+    }
+
+    final name = indexObject.getField(IndexField.name)?.toStringValue() ??
+        _generateIndexName(tableName, indexColumnNames);
+
+    return Index(name, tableName, unique, indexColumnNames);
+  }
 
   List<Index> _getIndices(final List<Field> fields, final String tableName) {
     return classElement
             .getAnnotation(annotations.Entity)
             ?.getField(AnnotationField.entityIndices)
             ?.toListValue()
-            ?.map((indexObject) {
-          final unique = indexObject.getField(IndexField.unique)?.toBoolValue();
-          // can't happen as Index.unique is non-nullable
-          if (unique == null) throw ArgumentError.notNull();
-
-          final indexColumnNames = indexObject
-              .getField(IndexField.value)
-              ?.toListValue()
-              ?.mapNotNull((valueObject) => valueObject.toStringValue())
-              .toList();
-
-          if (indexColumnNames == null || indexColumnNames.isEmpty) {
-            throw _processorError.missingIndexColumnName;
-          }
-
-          for (final indexColumnName in indexColumnNames) {
-            if (!fields.any((field) => field.columnName == indexColumnName)) {
-              throw _processorError.noMatchingColumn(indexColumnName);
-            }
-          }
-
-          final name = indexObject.getField(IndexField.name)?.toStringValue() ??
-              _generateIndexName(tableName, indexColumnNames);
-
-          return Index(name, tableName, unique, indexColumnNames);
-        }).toList() ??
+            ?.map(
+              (indexObject) => _resolveIndex(
+                  fields,
+                  tableName,
+                  indexObject,
+                  indexObject
+                      .getField(IndexField.value)
+                      ?.toListValue()
+                      ?.mapNotNull((valueObject) => valueObject.toStringValue())
+                      .toList()),
+            )
+            .toList() ??
         [];
+  }
+  
+  void _resolvePrefixes(final List<Field> fields, final String tableName) {
+    final map = classElement
+        .getAnnotation(annotations.Entity)
+        ?.getField(AnnotationField.entityPrefixes)
+        ?.toMapValue();
+    if (map == null || map.isEmpty) return;
+    
+    for (final entry in map.entries) {
+      final k = entry.key?.toStringValue();
+      if (k == null || k.isEmpty) {
+        throw _processorError.missingPrefixName;
+      }
+      final list = entry.value?.getField(IndexField.value)?.toListValue();
+      if (list == null || list.isEmpty) {
+        _prefixes[k] = const <Index>[];
+        continue;
+      }
+      _prefixes[k] = list
+          .map(
+            (indexObject) => _resolveIndex(
+                fields,
+                tableName,
+                indexObject,
+                indexObject
+                    .getField(IndexField.value)
+                    ?.toListValue()
+                    ?.mapNotNull((valueObject) => valueObject.toStringValue())
+                    .toList()),
+          )
+          .toList();
+    }
   }
 
   String _generateIndexName(

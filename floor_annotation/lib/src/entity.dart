@@ -14,6 +14,9 @@ class Entity {
 
   /// List of primary key column names.
   final List<String> primaryKeys;
+  
+  /// List of tables with the same structure but with the table name starting with the given prefix
+  final Map<String, List<Index>> prefixes;
 
   /// Whether the table is a "WITHOUT ROWID table".
   final bool withoutRowid;
@@ -24,6 +27,7 @@ class Entity {
     this.indices = const [],
     this.foreignKeys = const [],
     this.primaryKeys = const [],
+    this.prefixes = const {},
     this.withoutRowid = false,
   });
 }

@@ -12,6 +12,7 @@ class Entity extends Queryable {
   final PrimaryKey primaryKey;
   final List<ForeignKey> foreignKeys;
   final List<Index> indices;
+  final Map<String, List<Index>> prefixes;
   final bool withoutRowid;
   final String valueMapping;
   final Fts? fts;
@@ -28,6 +29,7 @@ class Entity extends Queryable {
     String constructor,
     this.valueMapping,
     this.fts, {
+    this.prefixes = const {},
     String? insertValueMapping,
   })  : this.insertValueMapping = insertValueMapping ?? valueMapping,
         super(classElement, name, fields, constructor);
