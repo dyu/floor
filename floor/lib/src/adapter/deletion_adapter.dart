@@ -24,42 +24,56 @@ class DeletionAdapter<T> {
         _valueMapper = valueMapper,
         _changeListener = changeListener;
 
-  Future<void> delete(final T item) async {
-    await _delete(item);
+  Future<void> delete(final T item, {
+    String? prefix,
+  }) async {
+    await _delete(item, prefix: prefix);
   }
 
-  Future<void> deleteList(final List<T> items) async {
+  Future<void> deleteList(final List<T> items, {
+    String? prefix,
+  }) async {
     if (items.isEmpty) return;
-    await _deleteList(items);
+    await _deleteList(items, prefix: prefix);
   }
 
-  Future<int> deleteAndReturnChangedRows(final T item) {
-    return _delete(item);
+  Future<int> deleteAndReturnChangedRows(final T item, {
+    String? prefix,
+  }) {
+    return _delete(item, prefix: prefix);
   }
 
-  Future<int> deleteListAndReturnChangedRows(final List<T> items) async {
+  Future<int> deleteListAndReturnChangedRows(final List<T> items, {
+    String? prefix,
+  }) async {
     if (items.isEmpty) return 0;
-    return _deleteList(items);
+    return _deleteList(items, prefix: prefix);
   }
 
-  Future<int> _delete(final T item) async {
+  Future<int> _delete(final T item, {
+    String? prefix,
+  }) async {
+    final entityName = prefix == null ? _entityName : '$prefix$_entityName';
     final result = await _database.delete(
-      _entityName,
+      entityName,
       where: PrimaryKeyHelper.getWhereClause(_primaryKeyColumnNames),
       whereArgs: PrimaryKeyHelper.getPrimaryKeyValues(
         _primaryKeyColumnNames,
         _valueMapper(item),
       ),
     );
-    if (result != 0) _changeListener?.add(_entityName);
+    if (result != 0) _changeListener?.add(entityName);
     return result;
   }
 
-  Future<int> _deleteList(final List<T> items) async {
+  Future<int> _deleteList(final List<T> items, {
+    String? prefix,
+  }) async {
+    final entityName = prefix == null ? _entityName : '$prefix$_entityName';
     final batch = _database.batch();
     for (final item in items) {
       batch.delete(
-        _entityName,
+        entityName,
         where: PrimaryKeyHelper.getWhereClause(_primaryKeyColumnNames),
         whereArgs: PrimaryKeyHelper.getPrimaryKeyValues(
           _primaryKeyColumnNames,
@@ -68,7 +82,7 @@ class DeletionAdapter<T> {
       );
     }
     final result = (await batch.commit(noResult: false)).cast<int>();
-    if (result.isNotEmpty) _changeListener?.add(_entityName);
+    if (result.isNotEmpty) _changeListener?.add(entityName);
     return result.isNotEmpty
         ? result.reduce((sum, element) => sum + element)
         : 0;
