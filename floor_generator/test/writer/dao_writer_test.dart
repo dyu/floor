@@ -112,6 +112,12 @@ void main() {
           @Query('SELECT * FROM person')
           Stream<List<Person>> findAllPersonsAsStream();
           
+          @Query('SELECT * FROM foo_person')
+          Future<List<Person>> findAllFooPersons();
+          
+          @Query('SELECT * FROM foo_person')
+          Stream<List<Person>> findAllFooPersonsAsStream();
+          
           @insert
           Future<void> insertPerson(Person person, {String? prefix});
           
@@ -176,6 +182,18 @@ void main() {
           @override
           Stream<List<Person>> findAllPersonsAsStream() {
             return _queryAdapter.queryListStream('SELECT * FROM person', mapper: (Map<String, Object?> row) => Person(row['id'] as int, row['name'] as String), queryableName: 'person', isView: false);
+          }
+          
+          @override
+          Future<List<Person>> findAllFooPersons() async {
+            return _queryAdapter.queryList('SELECT * FROM foo_person',
+                mapper: (Map<String, Object?> row) =>
+                    Person(row['id'] as int, row['name'] as String));
+          }
+          
+          @override
+          Stream<List<Person>> findAllFooPersonsAsStream() {
+            return _queryAdapter.queryListStream('SELECT * FROM foo_person', mapper: (Map<String, Object?> row) => Person(row['id'] as int, row['name'] as String), queryableName: 'foo_person', isView: false);
           }
         
           @override
@@ -520,7 +538,7 @@ const _prefixedPersonDef = '''
   tableName: 'person',
   indices: [Index(value: ['name'])],
   prefixes: {
-    'foo': null,
+    'foo_': null,
   },
 )
 class Person {
