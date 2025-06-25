@@ -14,6 +14,7 @@ import 'package:test/test.dart';
 
 import '../fakes.dart';
 import '../test_utils.dart';
+// import 'database_writer_test.dart' show toLiteral;
 
 void main() {
   useDartfmt();
@@ -96,6 +97,111 @@ void main() {
           @override
           Future<void> deletePerson(Person person) async {
             await _personDeletionAdapter.delete(person);
+          }
+        }
+        '''));
+  });
+  
+  test('create DAO prefixed', () async {
+    final dao = await _createDao('''
+        @dao
+        abstract class PersonDao {
+          @Query('SELECT * FROM person')
+          Future<List<Person>> findAllPersons();
+          
+          @Query('SELECT * FROM person')
+          Stream<List<Person>> findAllPersonsAsStream();
+          
+          @insert
+          Future<void> insertPerson(Person person, {String? prefix});
+          
+          @update
+          Future<void> updatePerson(Person person, {String? prefix});
+          
+          @delete
+          Future<void> deletePerson(Person person, {String? prefix});
+        }
+      ''', personDef: _prefixedPersonDef);
+
+    final actual =
+        DaoWriter(dao, dao.streamEntities.toSet(), dao.streamViews.isNotEmpty)
+            .write();
+    // print(toLiteral(actual));
+    expect(actual, equalsDart(r'''
+      class _$PersonDao extends PersonDao {
+          _$PersonDao(
+            this.database,
+            this.changeListener,
+          )   : _queryAdapter = QueryAdapter(database, changeListener),
+                _personInsertionAdapter = InsertionAdapter(
+                    database,
+                    'person',
+                    (Person item) =>
+                        <String, Object?>{'id': item.id, 'name': item.name},
+                    changeListener),
+                _personUpdateAdapter = UpdateAdapter(
+                    database,
+                    'person',
+                    ['id'],
+                    (Person item) =>
+                        <String, Object?>{'id': item.id, 'name': item.name},
+                    changeListener),
+                _personDeletionAdapter = DeletionAdapter(
+                    database,
+                    'person',
+                    ['id'],
+                    (Person item) =>
+                        <String, Object?>{'id': item.id, 'name': item.name},
+                    changeListener);
+        
+          final sqflite.DatabaseExecutor database;
+        
+          final StreamController<String> changeListener;
+        
+          final QueryAdapter _queryAdapter;
+        
+          final InsertionAdapter<Person> _personInsertionAdapter;
+        
+          final UpdateAdapter<Person> _personUpdateAdapter;
+        
+          final DeletionAdapter<Person> _personDeletionAdapter;
+        
+          @override
+          Future<List<Person>> findAllPersons() async {
+            return _queryAdapter.queryList('SELECT * FROM person',
+                mapper: (Map<String, Object?> row) =>
+                    Person(row['id'] as int, row['name'] as String));
+          }
+          
+          @override
+          Stream<List<Person>> findAllPersonsAsStream() {
+            return _queryAdapter.queryListStream('SELECT * FROM person', mapper: (Map<String, Object?> row) => Person(row['id'] as int, row['name'] as String), queryableName: 'person', isView: false);
+          }
+        
+          @override
+          Future<void> insertPerson(
+            Person person, {
+            String? prefix,
+          }) async {
+            await _personInsertionAdapter.insert(person, OnConflictStrategy.abort,
+                prefix: prefix);
+          }
+        
+          @override
+          Future<void> updatePerson(
+            Person person, {
+            String? prefix,
+          }) async {
+            await _personUpdateAdapter.update(person, OnConflictStrategy.abort,
+                prefix: prefix);
+          }
+        
+          @override
+          Future<void> deletePerson(
+            Person person, {
+            String? prefix,
+          }) async {
+            await _personDeletionAdapter.delete(person, prefix: prefix);
           }
         }
         '''));
@@ -409,7 +515,39 @@ void main() {
   });
 }
 
-Future<Dao> _createDao(final String dao) async {
+const _prefixedPersonDef = '''
+@Entity(
+  tableName: 'person',
+  indices: [Index(value: ['name'])],
+  prefixes: {
+    'foo': null,
+  },
+)
+class Person {
+  @primaryKey
+  final int id;
+
+  final String name;
+
+  Person(this.id, this.name);
+}
+''';
+
+const _defaultPersonDef = '''
+@entity
+class Person {
+  @primaryKey
+  final int id;
+
+  final String name;
+
+  Person(this.id, this.name);
+}
+''';
+
+Future<Dao> _createDao(final String dao, {
+  String? personDef,
+}) async {
   final library = await resolveSource('''
       library test;
       
@@ -417,15 +555,7 @@ Future<Dao> _createDao(final String dao) async {
       
       $dao
       
-      @entity
-      class Person {
-        @primaryKey
-        final int id;
-      
-        final String name;
-      
-        Person(this.id, this.name);
-      }
+      ${personDef ?? _defaultPersonDef}
 
       @DatabaseView("SELECT name FROM Person")
       class Name {

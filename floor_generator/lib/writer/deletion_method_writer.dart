@@ -45,10 +45,11 @@ class DeletionMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final suffix = 1 == _method.methodElement.parameters.length ? '' : ', prefix: prefix';
     if (_method.changesMultipleItems) {
-      return 'await _${entityClassName}DeletionAdapter.deleteList($methodSignatureParameterName);';
+      return 'await _${entityClassName}DeletionAdapter.deleteList($methodSignatureParameterName$suffix);';
     } else {
-      return 'await _${entityClassName}DeletionAdapter.delete($methodSignatureParameterName);';
+      return 'await _${entityClassName}DeletionAdapter.delete($methodSignatureParameterName$suffix);';
     }
   }
 
@@ -56,10 +57,11 @@ class DeletionMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final suffix = 1 == _method.methodElement.parameters.length ? '' : ', prefix: prefix';
     if (_method.changesMultipleItems) {
-      return 'return _${entityClassName}DeletionAdapter.deleteListAndReturnChangedRows($methodSignatureParameterName);';
+      return 'return _${entityClassName}DeletionAdapter.deleteListAndReturnChangedRows($methodSignatureParameterName$suffix);';
     } else {
-      return 'return _${entityClassName}DeletionAdapter.deleteAndReturnChangedRows($methodSignatureParameterName);';
+      return 'return _${entityClassName}DeletionAdapter.deleteAndReturnChangedRows($methodSignatureParameterName$suffix);';
     }
   }
 }

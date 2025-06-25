@@ -52,11 +52,12 @@ class InsertionMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final suffix = 1 == _method.methodElement.parameters.length ? '' : ', prefix: prefix';
     final fieldName = '_$entityClassName${_resolvePrefix(_method)}sertionAdapter';
     if (_method.changesMultipleItems) {
-      return 'await $fieldName.insertList($methodSignatureParameterName, ${_method.onConflict});';
+      return 'await $fieldName.insertList($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     } else {
-      return 'await $fieldName.insert($methodSignatureParameterName, ${_method.onConflict});';
+      return 'await $fieldName.insert($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     }
   }
 
@@ -64,11 +65,12 @@ class InsertionMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final suffix = 1 == _method.methodElement.parameters.length ? '' : ', prefix: prefix';
     final fieldName = '_$entityClassName${_resolvePrefix(_method)}sertionAdapter';
     if (_method.changesMultipleItems) {
-      return 'return $fieldName.insertListAndReturnIds($methodSignatureParameterName, ${_method.onConflict});';
+      return 'return $fieldName.insertListAndReturnIds($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     } else {
-      return 'return $fieldName.insertAndReturnId($methodSignatureParameterName, ${_method.onConflict});';
+      return 'return $fieldName.insertAndReturnId($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     }
   }
 }

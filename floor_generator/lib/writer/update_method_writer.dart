@@ -45,10 +45,11 @@ class UpdateMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final suffix = 1 == _method.methodElement.parameters.length ? '' : ', prefix: prefix';
     if (_method.changesMultipleItems) {
-      return 'return _${entityClassName}UpdateAdapter.updateListAndReturnChangedRows($methodSignatureParameterName, ${_method.onConflict});';
+      return 'return _${entityClassName}UpdateAdapter.updateListAndReturnChangedRows($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     } else {
-      return 'return _${entityClassName}UpdateAdapter.updateAndReturnChangedRows($methodSignatureParameterName, ${_method.onConflict});';
+      return 'return _${entityClassName}UpdateAdapter.updateAndReturnChangedRows($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     }
   }
 
@@ -56,10 +57,11 @@ class UpdateMethodWriter implements Writer {
     final String methodSignatureParameterName,
     final String entityClassName,
   ) {
+    final suffix = 1 == _method.methodElement.parameters.length ? '' : ', prefix: prefix';
     if (_method.changesMultipleItems) {
-      return 'await _${entityClassName}UpdateAdapter.updateList($methodSignatureParameterName, ${_method.onConflict});';
+      return 'await _${entityClassName}UpdateAdapter.updateList($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     } else {
-      return 'await _${entityClassName}UpdateAdapter.update($methodSignatureParameterName, ${_method.onConflict});';
+      return 'await _${entityClassName}UpdateAdapter.update($methodSignatureParameterName, ${_method.onConflict}$suffix);';
     }
   }
 }

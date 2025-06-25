@@ -21,6 +21,13 @@ class ChangeMethodWriterHelper {
     if (_changeMethod.requiresAsyncModifier) {
       methodBuilder..modifier = MethodModifier.async;
     }
+    if (1 != _changeMethod.methodElement.parameters.length) {
+      methodBuilder.optionalParameters.add((ParameterBuilder()
+            ..type = const Reference('String?')
+            ..name = 'prefix'
+            ..named = true)
+          .build());
+    }
   }
 
   Parameter _generateParameter() {
