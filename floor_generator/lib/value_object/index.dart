@@ -13,7 +13,7 @@ class Index {
     final escapedColumnNames =
         columnNames.map((columnName) => '`$columnName`').join(', ');
 
-    return 'CREATE$uniqueSql INDEX `$name`'
+    return 'CREATE$uniqueSql INDEX IF NOT EXISTS `$name`'
         ' ON `$tableName` ($escapedColumnNames)';
   }
 
