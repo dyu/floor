@@ -15,8 +15,27 @@ class Entity {
   /// List of primary key column names.
   final List<String> primaryKeys;
   
-  /// List of tables with the same structure but with the table name starting with the given prefix
-  final Map<String, List<Index>> prefixes;
+  /// Defines multiple tables inheriting the same structure as base table.
+  /// The base table name is prepended with the map key as prefix
+  /// Examples:
+  /// ```
+  /// tableName: 'person',
+  /// indices: [
+  ///   Index(value: ['name']),
+  /// ],
+  /// prefixes: {
+  ///   'copy_idx_': null,
+  ///   'empty_idx_': [],
+  ///   'custom_idx_': [
+  ///     Index(value: ['admin', 'name']),
+  ///   ],
+  /// },
+  /// ```
+  /// Tables outputs:
+  /// 1. copy_idx_person - has the same secondary index as base table
+  /// 2. empty_idx_person - has no secondary index
+  /// 3. custom_idx_person - has a single secondary index with the fields 'admin' and 'name' as composite keys
+  final Map<String, List<Index>?> prefixes;
 
   /// Whether the table is a "WITHOUT ROWID table".
   final bool withoutRowid;
