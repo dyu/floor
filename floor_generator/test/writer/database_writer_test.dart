@@ -241,8 +241,10 @@ void main() {
       
         @ColumnInfo(name: 'custom_name')
         final String custom_name;
+        
+        final String surname;
       
-        Person(this.id, this.custom_name);
+        Person(this.id, this.custom_name, this.surname);
       }
     ''');
 
@@ -256,15 +258,15 @@ void main() {
         
         static const Map<String, List<String>> _tableStatements = {
           "person": [
-            "CREATE TABLE IF NOT EXISTS `person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL);",
+            "CREATE TABLE IF NOT EXISTS `person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL, `surname` TEXT NOT NULL);",
             "CREATE INDEX IF NOT EXISTS `index_person_custom_name` ON `person` (`custom_name`);"
           ],
           "foo_person": [
-            "CREATE TABLE IF NOT EXISTS `foo_person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL);",
+            "CREATE TABLE IF NOT EXISTS `foo_person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL, `surname` TEXT NOT NULL);",
             "CREATE INDEX IF NOT EXISTS `index_foo_person_custom_name` ON `foo_person` (`custom_name`);"
           ],
           "bar_person": [
-            "CREATE TABLE IF NOT EXISTS `bar_person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL);"
+            "CREATE TABLE IF NOT EXISTS `bar_person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL, `surname` TEXT NOT NULL);"
           ]
         };
         
