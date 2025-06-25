@@ -6,6 +6,21 @@ import 'package:test/test.dart';
 import '../test_utils.dart';
 
 void main() {
+  test('Delete on prefixed entity', () async {
+    final insertionMethod = await '''
+      @delete
+      Future<void> deletePerson(Person person, {String? prefix});
+    '''
+        .asDaoMethodElement(entityDef: personPrefixedEntity);
+    final entity = await getEntity(personPrefixedEntity);
+    
+    final actual = DeletionMethodProcessor(insertionMethod, [entity])
+        .process()
+        .changesMultipleItems;
+
+    expect(actual, false);
+  });
+  
   group('expected errors', () {
     test('when not accepting Parameter', () async {
       final deletionMethod = await '''

@@ -36,18 +36,21 @@ class DeletionMethodProcessor implements Processor<DeletionMethod> {
       throw _errors.doesNotReturnVoidNorInt;
     }
 
+    /*
     final parameterElement = _helper.getParameterElement();
     final flattenedParameterType =
         _helper.getFlattenedParameterType(parameterElement);
 
     final entity = _helper.getEntity(flattenedParameterType);
+    */
+    final entity = _helper.getParameterEntity();
 
     return DeletionMethod(
       _methodElement,
       name,
       returnType,
       flattenedReturnType,
-      parameterElement,
+      _methodElement.parameters.first,
       entity,
     );
   }

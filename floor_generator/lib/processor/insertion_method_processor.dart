@@ -43,12 +43,14 @@ class InsertionMethodProcessor implements Processor<InsertionMethod> {
     if (!returnsVoid && !returnsIntList && !returnsInt) {
       throw _errors.doesNotReturnVoidNorIntNorListInt;
     }
-
+    /*
     final parameterElement = _helper.getParameterElement();
     final flattenedParameterType =
         _helper.getFlattenedParameterType(parameterElement);
 
     final entity = _helper.getEntity(flattenedParameterType);
+    */
+    final entity = _helper.getParameterEntity();
     final onConflict = _getOnConflictStrategy();
 
     return InsertionMethod(
@@ -56,7 +58,7 @@ class InsertionMethodProcessor implements Processor<InsertionMethod> {
       name,
       returnType,
       flattenedReturnType,
-      parameterElement,
+      _methodElement.parameters.first,
       entity,
       onConflict,
     );

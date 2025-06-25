@@ -19,6 +19,21 @@ void main() {
 
     expect(actual, equals('OnConflictStrategy.replace'));
   });
+  
+  test('Insert on prefixed entity', () async {
+    final insertionMethod = await '''
+      @Insert(onConflict: OnConflictStrategy.replace)
+      Future<void> insertPerson(Person person, {String? prefix});
+    '''
+        .asDaoMethodElement(entityDef: personPrefixedEntity);
+    final entity = await getEntity(personPrefixedEntity);
+    
+    final actual = InsertionMethodProcessor(insertionMethod, [entity])
+        .process()
+        .onConflict;
+
+    expect(actual, equals('OnConflictStrategy.replace'));
+  });
 
   group('expected errors', () {
     test('on wrong onConflict value', () async {

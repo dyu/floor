@@ -260,8 +260,31 @@ Future<Entity> getPersonEntity() async {
       .first;
 }
 
+Future<Entity> getEntity(String entityDef) async {
+  final library = await resolveSource('''
+      library test;
+      
+      import 'package:floor_annotation/floor_annotation.dart';
+      import 'dart:typed_data';
+      
+      $entityDef
+    ''', (resolver) async {
+    return resolver
+        .findLibraryByName('test')
+        .then((value) => ArgumentError.checkNotNull(value))
+        .then((value) => LibraryReader(value));
+  });
+
+  return library.classes
+      .where((classElement) => classElement.hasAnnotation(annotations.Entity))
+      .map((classElement) => EntityProcessor(classElement, {}).process())
+      .first;
+}
+
 extension StringExtension on String {
-  Future<MethodElement> asDaoMethodElement() async {
+  Future<MethodElement> asDaoMethodElement({
+    String? entityDef,
+  }) async {
     final library = await resolveSource('''
       library test;
             
@@ -273,7 +296,7 @@ extension StringExtension on String {
         $this 
       }
       
-      $_personEntity
+      ${entityDef ?? _personEntity}
     ''', (resolver) async {
       return resolver
           .findLibraryByName('test')
@@ -284,6 +307,36 @@ extension StringExtension on String {
     return library.classes.first.methods.first;
   }
 }
+
+const personPrefixedEntity = '''
+  @Entity(
+    tableName: 'person',
+    indices: [
+      Index(value: ['name']),
+    ],
+    prefixes: {
+      'copy_idx_': null,
+      'empty_idx_': [],
+      'custom_idx_': [
+        Index(value: ['admin', 'name']),
+      ],
+    },
+  )
+  class Person {
+    @primaryKey
+    final int id;
+        
+    final String name;
+    
+    final double weight;
+    
+    final bool admin;
+    
+    final Uint8List avatar;
+        
+    Person(this.id, this.name, this.weight, this.admin, this.avatar);
+  }
+''';
 
 const _personEntity = '''
   @entity

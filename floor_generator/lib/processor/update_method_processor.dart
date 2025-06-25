@@ -41,11 +41,13 @@ class UpdateMethodProcessor implements Processor<UpdateMethod> {
     if (!returnsInt && !returnsVoid) {
       throw _errors.doesNotReturnVoidNorInt;
     }
-
+    /*
     final parameterElement = _helper.getParameterElement();
     final flattenedParameterType =
         _helper.getFlattenedParameterType(parameterElement);
     final entity = _helper.getEntity(flattenedParameterType);
+    */
+    final entity = _helper.getParameterEntity();
     final onConflict = _getOnConflictStrategy();
 
     return UpdateMethod(
@@ -53,7 +55,7 @@ class UpdateMethodProcessor implements Processor<UpdateMethod> {
       name,
       returnType,
       flattenedReturnType,
-      parameterElement,
+      _methodElement.parameters.first,
       entity,
       onConflict,
     );
