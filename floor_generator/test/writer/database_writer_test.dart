@@ -233,6 +233,9 @@ void main() {
         prefixes: {
           'foo_': null,
           'bar_': [],
+          'baz_': [
+            Index(value: ['surname'])
+          ],
         }
       )
       class Person {
@@ -267,6 +270,10 @@ void main() {
           ],
           "bar_person": [
             "CREATE TABLE IF NOT EXISTS `bar_person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL, `surname` TEXT NOT NULL);"
+          ],
+          "baz_person": [
+            "CREATE TABLE IF NOT EXISTS `baz_person` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `custom_name` TEXT NOT NULL, `surname` TEXT NOT NULL);",
+            "CREATE INDEX IF NOT EXISTS `index_baz_person_surname` ON `baz_person` (`surname`);"
           ]
         };
         

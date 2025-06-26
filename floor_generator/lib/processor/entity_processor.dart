@@ -247,8 +247,10 @@ class EntityProcessor extends QueryableProcessor<Entity> {
             .toList();
         continue;
       }
-      final list = v.getField(IndexField.value)?.toListValue();
-      if (list == null || list.isEmpty) {
+      
+      final list = v.toListValue();
+      if (list == null) throw _processorError.invalidPrefixValue;
+      if (list.isEmpty) {
         // empty indices
         _prefixes[k] = const <Index>[];
         continue;

@@ -66,6 +66,15 @@ class EntityProcessorError {
       element: _classElement,
     );
   }
+  
+  InvalidGenerationSourceError get invalidPrefixValue {
+    return InvalidGenerationSourceError(
+      'Prefix value must be a list.',
+      todo:
+          "Make sure to add a prefix like: prefixes: {'pfx_name_': []}.",
+      element: _classElement,
+    );
+  }
 
   InvalidGenerationSourceError get missingIndexColumnName {
     return InvalidGenerationSourceError(
