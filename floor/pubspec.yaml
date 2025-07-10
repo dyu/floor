@@ -13,7 +13,8 @@ environment:
 
 dependencies:
   collection: ^1.15.0
-  floor_annotation: 1.4.2
+  floor_annotation:
+    path: ../floor_annotation
   flutter:
     sdk: flutter
   meta: ^1.7.0
