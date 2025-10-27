@@ -6,7 +6,7 @@ version: 1.5.0
 repository: https://github.com/dyu/floor.git
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.12.0 <4.0.0'
 
 dependencies:
   analyzer: ^5.0.0
