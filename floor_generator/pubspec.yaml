@@ -18,7 +18,7 @@ dependencies:
     git:
       url: https://github.com/dyu/floor
       path: floor_annotation
-      ref: repo-deps
+      ref: bhca
   meta: ^1.7.0
   source_gen: ^1.2.2
   strings: ^0.2.1
