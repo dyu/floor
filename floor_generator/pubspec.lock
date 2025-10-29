@@ -181,11 +181,11 @@ packages:
     dependency: "direct main"
     description:
       path: floor_annotation
-      ref: repo-deps
-      resolved-ref: "91a6f1268317e30993edc7b0bee0128246bd8263"
+      ref: bhca
+      resolved-ref: "72c49c28fed386b1aff2e55d64661fe75a123e8b"
       url: "https://github.com/dyu/floor"
     source: git
-    version: "1.4.2"
+    version: "1.5.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -494,9 +494,9 @@ packages:
     dependency: "direct dev"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: e3bb980197a0b9388ab1fb8cd841b0e1d05c6356
-      url: "https://github.com/dkaera/test_cov"
+      ref: main
+      resolved-ref: "7c8ee76649dada362d2730bf90eec5059d529252"
+      url: "https://github.com/dyu/test_cov"
     source: git
     version: "1.0.4"
   typed_data:
@@ -556,4 +556,4 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.0 <3.0.0"
+  dart: ">=2.19.0 <4.0.0"
