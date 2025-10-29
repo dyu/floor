@@ -32,4 +32,5 @@ dev_dependencies:
   test: ^1.21.1
   test_cov:
     git:
-      url: https://github.com/dkaera/test_cov
+      url: https://github.com/dyu/test_cov
+      ref: main
