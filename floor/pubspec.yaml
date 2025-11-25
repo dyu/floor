@@ -22,12 +22,8 @@ dependencies:
     sdk: flutter
   meta: ^1.7.0
   path: ^1.8.1
-  sqflite_common: ^2.4.5
-  sqflite_common_ffi:
-    git:
-      url: https://github.com/dyu/sqflite
-      path: sqflite_common_ffi
-      ref: bhca
+  sqflite_common: 2.5.6
+  sqflite_common_ffi: 2.4.0
   sqlparser: ^0.27.0
 
 dev_dependencies:
